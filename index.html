@@ -118,7 +118,8 @@
   .fab:active { transform: translateX(-50%) scale(.9); }
 
   .card { background: var(--clay); border-radius: 24px; box-shadow: var(--shadow-out);
-    padding: 20px; margin-bottom: 18px; }
+    padding: 20px; margin-bottom: 18px;
+    transition: transform .22s cubic-bezier(.2,.8,.2,1), box-shadow .22s ease, opacity .18s ease; }
   .card h2 { font-size: 1.02rem; font-weight: 800; margin-bottom: 14px; }
   .card h2 small { color: var(--ink-soft); font-weight: 600; font-size: .78rem; }
 
@@ -143,8 +144,10 @@
     width: 26px; height: 30px; min-width: 26px; border-radius: 8px; display: flex;
     align-items: center; justify-content: center; flex-shrink: 0; touch-action: none; }
   .drag-handle:active { cursor: grabbing; background: var(--field); }
-  .card.dragging { opacity: .55; box-shadow: var(--shadow-out-sm); }
+  .card.dragging { position: relative; z-index: 50; opacity: .97;
+    transform: scale(1.03) rotate(-1deg); box-shadow: 0 18px 34px rgba(21,21,26,.24); }
   .card.drag-active { cursor: grabbing; }
+  .card.drag-active:not(.dragging) { opacity: .9; }
   .collapse-toggle { border: none; background: var(--field); color: var(--ink-soft);
     width: 30px; height: 30px; min-width: 30px; border-radius: 10px; font-size: .85rem;
     cursor: pointer; display: flex; align-items: center; justify-content: center;
@@ -295,6 +298,7 @@
   table.hist { width: 100%; border-collapse: collapse; font-size: .87rem; }
   table.hist th { text-align: left; color: var(--ink-soft); font-size: .72rem;
     text-transform: uppercase; letter-spacing: .4px; padding: 6px 8px 10px; }
+.purchaseNoName { color: var(--ink-soft); }
   table.hist td { padding: 13px 8px; font-weight: 600; border-top: 1.5px dashed rgba(35,36,58,.14); }
   :root[data-theme="dark"] table.hist td { border-top-color: rgba(255,255,255,.12); }
   table.hist td:last-child { text-align: right; }
@@ -374,6 +378,13 @@
     cursor: pointer; font-family: inherit; margin-bottom: 12px; transition: background .15s, transform .12s; }
   .mode-opt:last-child { margin-bottom: 0; }
   .mode-opt:active { transform: scale(.98); background: var(--accent-soft); }
+.mode-opt.selected { background: var(--accent-soft); box-shadow: inset 0 0 0 2px var(--accent); }
+.mode-opt.selected .mode-opt-icon { color: var(--accent2); }
+.finish-sub { font-size: .8rem; color: var(--ink-soft); font-weight: 600; margin-bottom: 12px; line-height: 1.4; }
+#finishNameInput { margin-bottom: 14px; }
+.finish-pending-hint { font-size: .78rem; color: var(--ink-soft); font-weight: 700; margin: 2px 0 10px; }
+#finishPendingChoice .mode-opt { padding: 12px; margin-bottom: 8px; }
+#finishPendingChoice .mode-opt:last-child { margin-bottom: 0; }
   .mode-opt-icon { line-height: 1; flex-shrink: 0; color: var(--accent); }
   .mode-opt-text { display: flex; flex-direction: column; gap: 3px; }
   .mode-opt-text strong { font-size: .92rem; color: var(--ink); }
@@ -564,6 +575,36 @@
     <div class="mbtns">
       <button class="btn" id="mCancel" type="button">Cancelar</button>
       <button class="btn primary" id="mOk" type="button"><svg class="icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.8l5 5L20 6.3"/></svg> Comprar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Popup de finalizar compra -->
+<div class="overlay" id="finishOverlay">
+  <div class="modal">
+    <h3>Finalizar compra</h3>
+    <p class="finish-sub">Dá um nome, se quiser (ex: Mercado Extra) — ajuda quando você compra em mais de um lugar.</p>
+    <input id="finishNameInput" type="text" maxlength="60" placeholder="Nome da compra (opcional)">
+    <div id="finishPendingChoice" hidden>
+      <p class="finish-pending-hint" id="finishPendingHint"></p>
+      <button class="mode-opt selected" id="finishKeepPending" type="button" data-choice="keep">
+        <span class="mode-opt-icon"><svg class="icon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12a8.5 8.5 0 1 0 2.8-6.3"/><path d="M3.5 3.8v4.7h4.7"/></svg></span>
+        <span class="mode-opt-text">
+          <strong>Manter para a próxima</strong>
+          <small>Os itens que faltam continuam na lista — prontos pra comprar em outro mercado.</small>
+        </span>
+      </button>
+      <button class="mode-opt" id="finishClearPending" type="button" data-choice="clear">
+        <span class="mode-opt-icon"><svg class="icon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/><path d="M6.5 7l1 12.5a2 2 0 0 0 2 1.8h5a2 2 0 0 0 2-1.8l1-12.5"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></span>
+        <span class="mode-opt-text">
+          <strong>Apagar e começar do zero</strong>
+          <small>Remove os itens que ainda faltam — a lista some junto com essa compra.</small>
+        </span>
+      </button>
+    </div>
+    <div class="mbtns">
+      <button class="btn" id="finishCancelBtn" type="button">Cancelar</button>
+      <button class="btn primary" id="finishConfirmBtn" type="button"><svg class="icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.8l5 5L20 6.3"/></svg> Finalizar</button>
     </div>
   </div>
 </div>
@@ -1316,19 +1357,60 @@ document.getElementById("addForm").addEventListener("submit", e => {
   }
 });
 
+// ===== Finalizar compra (nome da compra + decisão sobre itens que sobraram) =====
+const finishOverlay = document.getElementById("finishOverlay");
+const finishNameInput = document.getElementById("finishNameInput");
+const finishPendingChoice = document.getElementById("finishPendingChoice");
+const finishPendingHint = document.getElementById("finishPendingHint");
+const finishKeepBtn = document.getElementById("finishKeepPending");
+const finishClearBtn = document.getElementById("finishClearPending");
+let finishPendingAction = "keep"; // padrão: manter os itens que faltam pra próxima compra
+function selectFinishPendingAction(action) {
+  finishPendingAction = action;
+  finishKeepBtn.classList.toggle("selected", action === "keep");
+  finishClearBtn.classList.toggle("selected", action === "clear");
+}
+function openFinishModal() {
+  finishNameInput.value = "";
+  const pending = state.items.filter(i => !i.done);
+  if (pending.length) {
+    finishPendingChoice.hidden = false;
+    finishPendingHint.textContent = "Ainda " + (pending.length === 1 ? "falta 1 item" : "faltam " + pending.length + " itens") +
+      " não comprado" + (pending.length === 1 ? "" : "s") + " nesta lista. O que fazer com " + (pending.length === 1 ? "ele" : "eles") + "?";
+    selectFinishPendingAction("keep");
+  } else {
+    finishPendingChoice.hidden = true;
+  }
+  finishOverlay.classList.add("show");
+  setTimeout(() => { finishNameInput.focus(); }, 60);
+}
+function closeFinishModal() { finishOverlay.classList.remove("show"); }
+finishKeepBtn.addEventListener("click", () => selectFinishPendingAction("keep"));
+finishClearBtn.addEventListener("click", () => selectFinishPendingAction("clear"));
+document.getElementById("finishCancelBtn").addEventListener("click", closeFinishModal);
+finishOverlay.addEventListener("click", e => { if (e.target === finishOverlay) closeFinishModal(); });
+finishNameInput.addEventListener("keydown", e => { if (e.key === "Escape") closeFinishModal(); });
+document.getElementById("finishConfirmBtn").addEventListener("click", () => {
+  const bought = state.items.filter(i => i.done);
+  if (!bought.length) { closeFinishModal(); return; }
+  const name = normName(finishNameInput.value || "");
+  state.purchases.push({
+    date: new Date().toISOString(),
+    name,
+    items: bought.map(i => ({ name: i.name, qty: i.qty, price: i.price })),
+    total: bought.reduce((s, i) => s + i.price * i.qty, 0)
+  });
+  state.items = finishPendingAction === "clear" ? [] : state.items.filter(i => !i.done);
+  saveState(state); renderList(); renderHistory();
+  closeFinishModal();
+  toast(name ? 'Compra "' + name + '" registrada no histórico ✓' : "Compra registrada no histórico ✓");
+});
 document.getElementById("finishBtn").addEventListener("click", () => {
   const bought = state.items.filter(i => i.done);
   if (!bought.length) return;
   const noPrice = bought.filter(i => i.price == null);
   if (noPrice.length) { toast("Informe o preço de: " + noPrice[0].name); return; }
-  state.purchases.push({
-    date: new Date().toISOString(),
-    items: bought.map(i => ({ name: i.name, qty: i.qty, price: i.price })),
-    total: bought.reduce((s, i) => s + i.price * i.qty, 0)
-  });
-  state.items = state.items.filter(i => !i.done);
-  saveState(state); renderList(); renderHistory();
-  toast("Compra registrada no histórico ✓");
+  openFinishModal();
 });
 
 // ===== Histórico =====
@@ -1423,10 +1505,10 @@ function renderHistory() {
     let rows = "";
     [...purchasesInRange].reverse().forEach(p => {
       const d = new Date(p.date);
-      rows += "<tr><td>" + d.toLocaleDateString("pt-BR") + "</td><td>" + p.items.length +
+      rows += "<tr><td>" + (p.name ? esc(p.name) : '<span class="purchaseNoName">—</span>') + "</td><td>" + d.toLocaleDateString("pt-BR") + "</td><td>" + p.items.length +
               " itens</td><td><strong>" + fmt(p.total) + "</strong></td></tr>";
     });
-    pw.innerHTML = '<table class="hist"><thead><tr><th>Data</th><th>Itens</th><th>Total</th></tr></thead><tbody>' + rows + "</tbody></table>";
+    pw.innerHTML = '<table class="hist"><thead><tr><th>Compra</th><th>Data</th><th>Itens</th><th>Total</th></tr></thead><tbody>' + rows + "</tbody></table>";
   }
   document.getElementById("clearHistoryBtn").hidden = state.purchases.length === 0;
   document.getElementById("exportHistoryBtn").hidden = state.purchases.length === 0;
@@ -1463,7 +1545,8 @@ function sanitizePurchase(raw) {
   });
   if (!items.length) return null;
   const total = Math.round(items.reduce((s, i) => s + i.price * i.qty, 0) * 100) / 100;
-  return { date: raw.date, items, total };
+  const name = typeof raw.name === "string" ? normName(raw.name).slice(0, 60) : "";
+  return { date: raw.date, name, items, total };
 }
 document.getElementById("exportHistoryBtn").addEventListener("click", () => {
   if (!state.purchases.length) return;
@@ -1619,7 +1702,7 @@ const TOUR_STEPS = [
   { sel: "#tipHint", tab: "lista", title: "✅ Marque como comprado", text: () => state.usageMode === "onthefly"
     ? "Como você já registra o preço na hora de adicionar, o item entra direto como comprado. Quer corrigir? Toque duas vezes no ✓ (desmarca e marca de novo) que ele reabre o preço pra ajustar."
     : "Na hora da compra, toque no ✓ do item: o app pergunta o preço (e deixa ajustar a quantidade) e já desconta do seu budget." },
-  { sel: "#finishBtn", tab: "lista", title: "🏁 Finalizar compra", text: "Quando terminar de marcar os itens, toque aqui pra arquivar a compra no histórico e começar uma lista nova." },
+  { sel: "#finishBtn", tab: "lista", title: "🏁 Finalizar compra", text: "Quando terminar de marcar os itens, toque aqui: dá pra dar um nome à compra (ex: Mercado Extra) e, se sobrar item sem comprar, escolher entre manter pra próxima compra ou apagar e recomeçar — útil quando você compra em mais de um mercado." },
   { sel: ".dateRow", tab: "historico", title: "🔎 Buscar por data", text: "Filtre um período pra ver preços e compras só daquela época — útil pra comparar valores ao longo do ano." },
   { sel: "#varWrap", tab: "historico", title: "📊 Variação de preço", text: "Veja se cada produto ficou mais caro (▲) ou mais barato (▼) desde a última vez que você comprou." },
   { sel: "#purchasesWrap", tab: "historico", title: "🧾 Compras finalizadas", text: "Toda compra que você finalizar aparece aqui, com data, quantidade de itens e total gasto." },
@@ -1741,6 +1824,24 @@ function saveCardOrder() {
   try { localStorage.setItem(CARD_ORDER_KEY, JSON.stringify(ids)); } catch (e) {}
 }
 applyCardOrder();
+// Anima os cards vizinhos deslizando pro novo lugar (técnica FLIP), enquanto o card
+// arrastado "pula" direto pra posição nova — assim a troca parece suave, não um corte seco.
+function animateCardShuffle(moveFn) {
+  const others = cardsInCurrentOrder().filter(c => c !== dragCardEl);
+  const firstRects = others.map(c => [c, c.getBoundingClientRect()]);
+  moveFn();
+  firstRects.forEach(([c, first]) => {
+    const last = c.getBoundingClientRect();
+    const deltaY = first.top - last.top;
+    if (!deltaY) return;
+    c.style.transition = "none";
+    c.style.transform = "translateY(" + deltaY + "px)";
+    requestAnimationFrame(() => {
+      c.style.transition = "transform .22s cubic-bezier(.2,.8,.2,1)";
+      c.style.transform = "";
+    });
+  });
+}
 function onCardDragMove(e) {
   if (!dragCardEl) return;
   const y = e.clientY;
@@ -1750,13 +1851,18 @@ function onCardDragMove(e) {
     const rect = sib.getBoundingClientRect();
     if (y < rect.top + rect.height / 2) { target = sib; break; }
   }
-  if (target) cardOrderContainer.insertBefore(dragCardEl, target);
-  else cardOrderContainer.appendChild(dragCardEl);
+  const willMove = target ? target !== dragCardEl.nextElementSibling : cardOrderContainer.lastElementChild !== dragCardEl;
+  if (!willMove) return;
+  animateCardShuffle(() => {
+    if (target) cardOrderContainer.insertBefore(dragCardEl, target);
+    else cardOrderContainer.appendChild(dragCardEl);
+  });
 }
 function onCardDragEnd() {
   if (!dragCardEl) return;
   dragCardEl.classList.remove("dragging");
   cardOrderContainer.classList.remove("drag-active");
+  cardsInCurrentOrder().forEach(c => { c.style.transition = ""; c.style.transform = ""; });
   dragCardEl = null;
   document.removeEventListener("pointermove", onCardDragMove);
   document.removeEventListener("pointerup", onCardDragEnd);
