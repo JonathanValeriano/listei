@@ -102,6 +102,10 @@
     align-items: center; justify-content: center; transition: transform .15s, background .15s; }
   .theme-toggle { right: 18px; }
   .theme-toggle:active, .help-btn:active { background: rgba(255,255,255,.3); transform: scale(.94); }
+  .account-btn { top: 88px; right: 18px; }
+  .account-btn.logged-in { background: rgba(255,255,255,.4); }
+  .account-btn .accountDot { position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 50%; background: #34d399; border: 1.5px solid var(--accent); display: none; }
+  .account-btn.logged-in .accountDot { display: block; }
 
   .tabs { position: fixed; left: 16px; right: 16px; bottom: 16px; z-index: 40; margin: 0 auto;
     max-width: 620px; display: flex; gap: 6px; padding: 7px;
@@ -385,6 +389,11 @@
 .mode-opt.selected .mode-opt-icon { color: var(--accent2); }
 .finish-sub { font-size: .8rem; color: var(--ink-soft); font-weight: 600; margin-bottom: 12px; line-height: 1.4; }
 #finishNameInput { margin-bottom: 14px; }
+#authEmail, #authPassword { margin-bottom: 10px; }
+.authError { color: var(--red); font-size: .78rem; font-weight: 700; min-height: 1.2em; margin: 2px 0 0; text-align: center; }
+.authToggleWrap { text-align: center; margin-top: 14px; }
+.authToggleModeBtn { border: none; background: transparent; color: var(--accent); font-weight: 700; font-size: .82rem; cursor: pointer; font-family: inherit; }
+#authAccountEmail { text-align: center; word-break: break-all; }
 .finish-pending-hint { font-size: .78rem; color: var(--ink-soft); font-weight: 700; margin: 2px 0 10px; }
 #finishPendingChoice .mode-opt { padding: 12px; margin-bottom: 8px; }
 #finishPendingChoice .mode-opt:last-child { margin-bottom: 0; }
@@ -419,6 +428,7 @@
     <button class="help-btn" id="helpBtn" type="button" title="Como usar o Listei"><svg class="icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.2 9.3a2.8 2.8 0 1 1 3.9 2.6c-.9.5-1.4 1.1-1.4 2.2"/><circle cx="12" cy="17.2" r="1" fill="currentColor" stroke="none"/></svg></button>
     <button class="help-btn mode-btn" id="modeChangeBtn" type="button" title="Trocar modo de uso"><svg class="icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3l4 4-4 4"/><path d="M21 7H8.5a4 4 0 0 0-4 4v1"/><path d="M7 21l-4-4 4-4"/><path d="M3 17h12.5a4 4 0 0 0 4-4v-1"/></svg></button>
     <button class="theme-toggle" id="themeToggle" type="button" title="Alternar tema"><svg class="icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.6A8.6 8.6 0 1 1 9.4 4a7 7 0 0 0 10.6 10.6z"/></svg></button>
+    <button class="help-btn account-btn" id="accountBtn" type="button" title="Entrar / Criar conta"><svg class="icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.3" r="3.3"/><path d="M4.5 20c1-4 4-6 7.5-6s6.5 2 7.5 6"/></svg><span class="accountDot"></span></button>
     <h1>List<span>ei</span></h1>
     <p>Lista de compras com histórico de preços</p>
     <button class="install-btn" id="installBtn" type="button" hidden><svg class="icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12.5"/><path d="M7 11.5l5 5 5-5"/><path d="M5 21h14"/></svg> Instalar app</button>
@@ -642,6 +652,35 @@
   </div>
 </div>
 
+<!-- Conta (entrar / criar conta / sair) -->
+<div class="overlay" id="authOverlay">
+  <div class="modal">
+    <div id="authFormView">
+      <h3 id="authTitle">Entrar</h3>
+      <p class="finish-sub">Crie uma conta pra sincronizar sua lista entre o celular e o computador.</p>
+      <form id="authForm" autocomplete="off">
+        <input id="authEmail" type="email" placeholder="E-mail" autocomplete="email" maxlength="120" required>
+        <input id="authPassword" type="password" placeholder="Senha (mín. 6 caracteres)" autocomplete="current-password" minlength="6" maxlength="72" required>
+        <p class="authError" id="authError"></p>
+        <div class="mbtns">
+          <button class="btn" id="authCancelBtn" type="button">Agora não</button>
+          <button class="btn primary" id="authSubmitBtn" type="submit">Entrar</button>
+        </div>
+      </form>
+      <p class="authToggleWrap"><button class="authToggleModeBtn" id="authToggleModeBtn" type="button">Não tem conta? Criar uma</button></p>
+    </div>
+    <div id="authLoggedView" hidden>
+      <h3>Sua conta</h3>
+      <p class="finish-sub">Conectado e sincronizando:</p>
+      <p class="mprod" id="authAccountEmail"></p>
+      <div class="mbtns">
+        <button class="btn" id="authCloseBtn2" type="button">Fechar</button>
+        <button class="btn primary" id="authSignOutBtn" type="button">Sair da conta</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Tour guiado de primeiro uso -->
 <div class="tour-overlay" id="tourOverlay">
   <div class="tour-spot" id="tourSpot"></div>
@@ -658,6 +697,7 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 "use strict";
 // ===== Tema (dark mode) =====
@@ -693,6 +733,7 @@ function loadState() {
 function saveState(s) {
   mem = s;
   try { localStorage.setItem(KEY, JSON.stringify(s)); } catch (e) { /* fallback memória */ }
+  if (typeof scheduleCloudPush === "function") scheduleCloudPush();
 }
 // ===== Ícones (SVG de linha, sem emoji) =====
 // Conjunto único de ícones desenhados à mão pra interface fixa (botões, abas, títulos, badges).
@@ -1967,6 +2008,227 @@ window.addEventListener("appinstalled", () => {
   if (installBtn) installBtn.hidden = true;
   toast("Listei instalado ✓");
 });
+
+// ===== Conta e sincronização na nuvem (Supabase) =====
+// Tudo aqui é opcional: sem internet ou sem o script do Supabase carregado,
+// "supa" fica null e o app continua funcionando 100% local, como sempre funcionou.
+const SUPABASE_URL = "https://ulnrvsaqvmpfdabmnvqu.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_69KsJb7DjqPJXHbrNabZKg_MPXPn45r";
+let supa = null;
+try {
+  if (typeof supabase !== "undefined" && supabase.createClient) {
+    supa = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  }
+} catch (e) { supa = null; }
+
+let cloudSession = null;
+let cloudHouseholdId = null;
+let cloudListId = null;
+let cloudSyncedPurchaseCount = 0;
+let cloudSyncTimer = null;
+let cloudPulling = false; // evita que o push dispare enquanto um pull está em andamento
+
+const accountBtn = document.getElementById("accountBtn");
+const authOverlay = document.getElementById("authOverlay");
+const authFormView = document.getElementById("authFormView");
+const authLoggedView = document.getElementById("authLoggedView");
+const authTitle = document.getElementById("authTitle");
+const authEmail = document.getElementById("authEmail");
+const authPassword = document.getElementById("authPassword");
+const authError = document.getElementById("authError");
+const authSubmitBtn = document.getElementById("authSubmitBtn");
+const authToggleModeBtn = document.getElementById("authToggleModeBtn");
+const authAccountEmail = document.getElementById("authAccountEmail");
+let authMode = "signin";
+
+function updateAuthModeUI() {
+  authTitle.textContent = authMode === "signin" ? "Entrar" : "Criar conta";
+  authSubmitBtn.textContent = authMode === "signin" ? "Entrar" : "Criar conta";
+  authToggleModeBtn.textContent = authMode === "signin" ? "Não tem conta? Criar uma" : "Já tem conta? Entrar";
+}
+function openAuthOverlay() {
+  authError.textContent = "";
+  if (cloudSession) {
+    authLoggedView.hidden = false;
+    authFormView.hidden = true;
+    authAccountEmail.textContent = cloudSession.user.email;
+  } else {
+    authLoggedView.hidden = true;
+    authFormView.hidden = false;
+    authMode = "signin";
+    authEmail.value = ""; authPassword.value = "";
+    updateAuthModeUI();
+  }
+  authOverlay.classList.add("show");
+}
+function closeAuthOverlay() { authOverlay.classList.remove("show"); }
+function traduzErroAuth(msg) {
+  if (/already registered|already exists/i.test(msg)) return "Esse e-mail já tem conta cadastrada — tente entrar.";
+  if (/invalid login credentials/i.test(msg)) return "E-mail ou senha incorretos.";
+  if (/password/i.test(msg) && /(short|at least|6 characters)/i.test(msg)) return "Senha muito curta (mínimo 6 caracteres).";
+  if (/email/i.test(msg) && /invalid/i.test(msg)) return "E-mail inválido.";
+  if (/network|fetch/i.test(msg)) return "Sem conexão com a internet no momento.";
+  return msg;
+}
+function updateAccountUI() {
+  accountBtn.classList.toggle("logged-in", !!cloudSession);
+  accountBtn.title = cloudSession ? "Conta: " + cloudSession.user.email : "Entrar / Criar conta";
+}
+
+accountBtn.addEventListener("click", openAuthOverlay);
+authOverlay.addEventListener("click", e => { if (e.target === authOverlay) closeAuthOverlay(); });
+document.getElementById("authCancelBtn").addEventListener("click", closeAuthOverlay);
+document.getElementById("authCloseBtn2").addEventListener("click", closeAuthOverlay);
+authToggleModeBtn.addEventListener("click", () => {
+  authMode = authMode === "signin" ? "signup" : "signin";
+  authError.textContent = "";
+  updateAuthModeUI();
+});
+document.getElementById("authSignOutBtn").addEventListener("click", async () => {
+  if (supa) { try { await supa.auth.signOut(); } catch (e) { /* ignora */ } }
+  closeAuthOverlay();
+  toast("Você saiu da conta — seus dados continuam salvos neste aparelho");
+});
+document.getElementById("authForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  if (!supa) { authError.textContent = "Não foi possível conectar — verifique sua internet e tente de novo."; return; }
+  const email = authEmail.value.trim();
+  const password = authPassword.value;
+  if (!email || password.length < 6) { authError.textContent = "Informe um e-mail válido e uma senha de ao menos 6 caracteres."; return; }
+  authError.textContent = "";
+  authSubmitBtn.disabled = true;
+  try {
+    const { data, error } = authMode === "signin"
+      ? await supa.auth.signInWithPassword({ email, password })
+      : await supa.auth.signUp({ email, password });
+    if (error) { authError.textContent = traduzErroAuth(error.message); return; }
+    if (authMode === "signup" && data && !data.session) {
+      toast("Conta criada! Confirme pelo link enviado ao seu e-mail antes de entrar ✓");
+      closeAuthOverlay();
+      return;
+    }
+    toast(authMode === "signin" ? "Login feito ✓" : "Conta criada ✓");
+    closeAuthOverlay();
+  } catch (e) {
+    authError.textContent = "Algo deu errado — tente de novo em instantes.";
+  } finally {
+    authSubmitBtn.disabled = false;
+  }
+});
+
+async function cloudLoadHousehold() {
+  const { data: member } = await supa.from("household_members").select("household_id").eq("user_id", cloudSession.user.id).limit(1).maybeSingle();
+  if (!member) return;
+  cloudHouseholdId = member.household_id;
+  const { data: list } = await supa.from("lists").select("id").eq("household_id", cloudHouseholdId).limit(1).maybeSingle();
+  if (list) cloudListId = list.id;
+}
+
+async function cloudPullAndMerge() {
+  if (!cloudListId) return;
+  cloudPulling = true;
+  try {
+    const [itemsRes, listRes, purchasesRes] = await Promise.all([
+      supa.from("items").select("*").eq("list_id", cloudListId).order("position", { ascending: true }),
+      supa.from("lists").select("budget, usage_mode").eq("id", cloudListId).maybeSingle(),
+      supa.from("purchases").select("name, purchased_at, total, purchase_items(name, qty, price)").eq("household_id", cloudHouseholdId).order("purchased_at", { ascending: true })
+    ]);
+    const remoteItems = itemsRes.data || [];
+    const remoteList = listRes.data;
+    const remotePurchases = purchasesRes.data || [];
+
+    const remoteHasData = remoteItems.length > 0 || remotePurchases.length > 0;
+    const localHasData = state.items.length > 0 || state.purchases.length > 0;
+
+    if (!remoteHasData && localHasData) {
+      // primeiro login com dados locais já existentes: manda o que já tinha pra nuvem
+      cloudPulling = false;
+      await cloudPushFull();
+      return;
+    }
+
+    state.items = remoteItems.map(it => ({
+      id: it.id, name: it.name, qty: it.qty, price: it.price, done: it.done,
+      category: it.category || detectCategory(it.name)
+    }));
+    state.purchases = remotePurchases.map(p => ({
+      date: p.purchased_at, name: p.name || "",
+      items: (p.purchase_items || []).map(pi => ({ name: pi.name, qty: pi.qty, price: pi.price })),
+      total: Number(p.total)
+    }));
+    cloudSyncedPurchaseCount = state.purchases.length;
+    if (remoteList) {
+      state.budget = remoteList.budget != null ? Number(remoteList.budget) : null;
+      if (remoteList.usage_mode) state.usageMode = remoteList.usage_mode;
+    }
+    mem = state;
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* ignore */ }
+    renderList(); renderHistory();
+    if (state.usageMode) applyUsageMode(state.usageMode);
+    toast("Lista sincronizada com a nuvem ✓");
+  } catch (e) {
+    console.error("Erro ao sincronizar com a nuvem:", e);
+  } finally {
+    cloudPulling = false;
+  }
+}
+
+function scheduleCloudPush() {
+  if (!supa || !cloudSession || !cloudListId || cloudPulling) return;
+  clearTimeout(cloudSyncTimer);
+  cloudSyncTimer = setTimeout(cloudPushFull, 900);
+}
+
+async function cloudPushFull() {
+  if (!supa || !cloudSession || !cloudListId) return;
+  try {
+    await supa.from("lists").update({ budget: state.budget, usage_mode: state.usageMode || null }).eq("id", cloudListId);
+
+    await supa.from("items").delete().eq("list_id", cloudListId);
+    if (state.items.length) {
+      const rows = state.items.map((it, idx) => ({
+        id: it.id, list_id: cloudListId, name: it.name, qty: it.qty, price: it.price,
+        done: it.done, category: it.category, position: idx
+      }));
+      await supa.from("items").insert(rows);
+    }
+
+    if (state.purchases.length < cloudSyncedPurchaseCount) {
+      // histórico foi apagado localmente (ex: "Limpar histórico"): apaga também na nuvem
+      await supa.from("purchases").delete().eq("household_id", cloudHouseholdId);
+      cloudSyncedPurchaseCount = 0;
+    }
+    const newPurchases = state.purchases.slice(cloudSyncedPurchaseCount);
+    for (const p of newPurchases) {
+      const { data: inserted } = await supa.from("purchases").insert({
+        household_id: cloudHouseholdId, name: p.name || "", purchased_at: p.date, total: p.total
+      }).select("id").single();
+      if (inserted && p.items.length) {
+        await supa.from("purchase_items").insert(p.items.map(i => ({ purchase_id: inserted.id, name: i.name, qty: i.qty, price: i.price })));
+      }
+    }
+    cloudSyncedPurchaseCount = state.purchases.length;
+  } catch (e) {
+    console.error("Erro ao enviar dados pra nuvem:", e);
+  }
+}
+
+function cloudInit() {
+  if (!supa) { updateAccountUI(); return; }
+  supa.auth.onAuthStateChange(async (event, session) => {
+    const hadSession = !!cloudSession;
+    cloudSession = session;
+    if (session && !hadSession) {
+      await cloudLoadHousehold();
+      await cloudPullAndMerge();
+    }
+    if (!session && hadSession) {
+      cloudHouseholdId = null; cloudListId = null; cloudSyncedPurchaseCount = 0;
+    }
+    updateAccountUI();
+  });
+}
+cloudInit();
 </script>
 </body>
 </html>
