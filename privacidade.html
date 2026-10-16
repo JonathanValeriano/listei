@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Política de Privacidade — Listei</title>
+<style>
+  :root { color-scheme: light; --bg:#f5f5f7; --ink:#15151a; --ink-soft:#55555f; --accent:#4f46e5; --card:#ffffff; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Inter",-apple-system,"SF Pro Display","Segoe UI",Roboto,system-ui,sans-serif;
+    line-height:1.65; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 40px 20px 80px; }
+  a.back { color:var(--accent); text-decoration:none; font-weight:700; font-size:.9rem; }
+  a.back:hover { text-decoration:underline; }
+  .card { background:var(--card); border-radius:20px; box-shadow:0 10px 26px rgba(21,21,26,.07); padding:36px 32px; margin-top:20px; }
+  h1 { font-size:1.6rem; margin:0 0 4px; }
+  .updated { color:var(--ink-soft); font-size:.85rem; font-weight:600; margin-bottom:28px; }
+  h2 { font-size:1.05rem; margin:28px 0 8px; color:var(--accent); }
+  h2:first-of-type { margin-top: 0; }
+  p, li { color:#2a2a33; font-size:.95rem; }
+  ul { padding-left: 1.2em; }
+  li { margin-bottom: 6px; }
+  strong { color: var(--ink); }
+  .note { background:#ebeafd; border-radius:14px; padding:14px 16px; font-size:.88rem; color:#2a2a33; margin:14px 0; }
+  .contact { background:var(--bg); border-radius:14px; padding:16px 18px; margin-top:10px; font-size:.9rem; }
+  footer { text-align:center; color:var(--ink-soft); font-size:.78rem; margin-top:30px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">← Voltar para o Listei</a>
+  <div class="card">
+    <h1>Política de Privacidade do Listei</h1>
+    <div class="updated">Última atualização: outubro de 2026</div>
+
+    <p>Esta Política explica quais dados o Listei coleta, por que, como são usados e protegidos, e quais direitos você tem sobre eles. Escrevemos em linguagem direta — se algo não ficar claro, use o contato no fim da página.</p>
+
+    <h2>1. Quem é responsável pelos seus dados</h2>
+    <p>O Listei é um projeto pessoal mantido por <strong>Jonathan Valeriano</strong>, que atua como controlador e encarregado (DPO) dos dados tratados pelo serviço, nos termos da Lei Geral de Proteção de Dados (Lei nº 13.709/2018 — LGPD). Contato ao fim desta página.</p>
+
+    <h2>2. Quais dados coletamos</h2>
+    <p><strong>Dados de conta:</strong> e-mail e senha (a senha nunca é armazenada em texto puro — isso é feito pelo provedor de autenticação, de forma criptografada).</p>
+    <p><strong>Dados de uso do app:</strong> os itens da sua lista de compras, quantidades, preços, orçamento definido, histórico de compras finalizadas e o nome que você der a cada compra.</p>
+    <p><strong>Dado opcional de localização (bairro/região):</strong> só é coletado se você ativar essa opção explicitamente (desligada por padrão). Detalhes na seção 6.</p>
+    <p>Não coletamos CPF, endereço completo, dados de cartão ou qualquer dado financeiro sensível — mesmo quando a assinatura paga existir, o pagamento será processado diretamente por um provedor especializado (ex: Stripe), e o Listei não terá acesso ao número do seu cartão.</p>
+
+    <h2>3. Para que usamos esses dados</h2>
+    <ul>
+      <li>Fazer o app funcionar: sincronizar sua lista entre seus aparelhos e, quando aplicável, com outros membros da sua "casa" compartilhada.</li>
+      <li>Lembrar suas preferências (tema, modo de uso, orçamento).</li>
+      <li>Comunicações operacionais essenciais (ex: confirmação de conta, aviso de problema na assinatura).</li>
+      <li>Apenas com seu consentimento separado: gerar estatísticas agregadas e anônimas de padrões de compra por região (seção 6).</li>
+    </ul>
+    <p>Não vendemos, alugamos ou compartilhamos seus dados pessoais com terceiros para fins de publicidade.</p>
+
+    <h2>4. Com quem compartilhamos</h2>
+    <p>Usamos fornecedores de infraestrutura que atuam como <strong>operadores</strong> (processam os dados só sob nossas instruções, nunca por conta própria):</p>
+    <ul>
+      <li><strong>Supabase</strong> — hospedagem do banco de dados e autenticação. O banco roda fisicamente na região São Paulo (Brasil), mas a empresa que presta esse serviço tem operação internacional; isso pode envolver acesso administrativo ou de suporte a partir de outros países, sob contrato de confidencialidade.</li>
+      <li><strong>Processador de pagamento</strong> (quando a assinatura paga estiver disponível) — recebe só o necessário para cobrar a assinatura; o Listei não guarda dado de cartão.</li>
+    </ul>
+
+    <h2>5. Por quanto tempo guardamos</h2>
+    <p>Enquanto sua conta existir. Se você excluir sua conta, seus dados (lista, histórico, preferências) são apagados permanentemente em até 30 dias, exceto o que formos legalmente obrigados a manter (ex: registros fiscais de uma assinatura paga, pelo prazo exigido em lei).</p>
+
+    <h2>6. Localização por bairro/região (opcional) e estatísticas de mercado</h2>
+    <div class="note">
+      Essa função é <strong>desativada por padrão</strong>. Só coletamos e usamos esse dado se você ativar explicitamente, numa tela separada do cadastro normal — ativar o Listei não exige aceitar isso.
+    </div>
+    <ul>
+      <li>Guardamos apenas <strong>bairro ou região</strong> (ex: "Tucuruvi", "Jabaquara") — nunca coordenadas de GPS exatas nem seu endereço.</li>
+      <li>Usamos isso só para gerar <strong>relatórios agregados e anônimos</strong> (ex: "compras de cerveja aumentam aos finais de semana em determinadas regiões"). Esses relatórios nunca expõem a lista de uma casa específica, e só são calculados quando há um número mínimo de casas na mesma região — pra evitar identificar uma família isolada.</li>
+      <li>Você pode desativar essa opção a qualquer momento nas configurações da conta; os dados de localização já coletados são apagados quando você desativa.</li>
+    </ul>
+
+    <h2>7. Como protegemos seus dados</h2>
+    <ul>
+      <li>Toda comunicação entre o app e o servidor é criptografada (HTTPS).</li>
+      <li>Usamos controle de acesso por linha no banco de dados (Row Level Security): cada "casa" só consegue ler ou alterar os próprios dados — mesmo um erro de programação não permite acessar dados de outra família.</li>
+      <li>Senhas são gerenciadas pelo provedor de autenticação, nunca armazenadas em texto puro pelo Listei.</li>
+    </ul>
+
+    <h2>8. Seus direitos (Art. 18 da LGPD)</h2>
+    <p>Você pode, a qualquer momento:</p>
+    <ul>
+      <li><strong>Acessar</strong> os dados que temos sobre você.</li>
+      <li><strong>Corrigir</strong> dados incompletos ou desatualizados.</li>
+      <li><strong>Baixar</strong> uma cópia dos seus dados (exportação em JSON), diretamente pelo app ou mediante solicitação.</li>
+      <li><strong>Excluir</strong> sua conta e todos os dados associados.</li>
+      <li><strong>Revogar</strong> o consentimento de localização/estatísticas a qualquer momento, sem afetar o uso do restante do app.</li>
+    </ul>
+    <p>Para exercer qualquer um desses direitos, use o contato abaixo.</p>
+
+    <h2>9. Crianças e adolescentes</h2>
+    <p>O Listei não é direcionado a menores de 18 anos desacompanhados. Se um responsável quiser usar o app em nome de um menor dentro da "casa" compartilhada, a conta e os dados ficam sob responsabilidade do responsável titular da conta.</p>
+
+    <h2>10. Mudanças nesta política</h2>
+    <p>Podemos atualizar esta política conforme o Listei evoluir (ex: ao lançar a assinatura paga ou o compartilhamento familiar). Mudanças relevantes serão avisadas dentro do app antes de entrarem em vigor.</p>
+
+    <h2>Contato</h2>
+    <div class="contact">
+      <strong>Encarregado de Dados (DPO):</strong> Jonathan Valeriano<br>
+      <strong>E-mail:</strong> jw.valeriano@hotmail.com
+    </div>
+  </div>
+  <footer>Listei — lista de compras colaborativa</footer>
+</div>
+</body>
+</html>
