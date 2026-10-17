@@ -389,11 +389,23 @@
 .mode-opt.selected .mode-opt-icon { color: var(--accent2); }
 .finish-sub { font-size: .8rem; color: var(--ink-soft); font-weight: 600; margin-bottom: 12px; line-height: 1.4; }
 #finishNameInput { margin-bottom: 14px; }
-#authEmail, #authPassword { margin-bottom: 10px; }
+.authHead { text-align: center; margin-bottom: 18px; }
+.authIconBadge { width: 56px; height: 56px; border-radius: 50%; margin: 0 auto 14px;
+  background: linear-gradient(135deg, var(--accent), #7c6cf0); display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 10px 22px rgba(79,70,229,.32); }
+.authIconBadge svg { color: #fff; }
+.authIconBadge-pending { background: linear-gradient(135deg, #f5a623, #f3752c); box-shadow: 0 10px 22px rgba(243,117,44,.3); }
+.authIconBadge-ok { background: linear-gradient(135deg, var(--green), #1fa578); box-shadow: 0 10px 22px rgba(47,190,143,.3); }
+.authHead h3 { font-size: 1.15rem; margin-bottom: 6px; }
+.authHead .finish-sub { margin-bottom: 0; }
+.authFieldWrap { position: relative; margin-bottom: 10px; }
+.authFieldWrap .authFieldIcon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--ink-soft); pointer-events: none; }
+#authEmail, #authPassword { text-align: left; font-weight: 600; font-size: .95rem; padding-left: 40px; }
 .authError { color: var(--red); font-size: .78rem; font-weight: 700; min-height: 1.2em; margin: 2px 0 0; text-align: center; }
-.authToggleWrap { text-align: center; margin-top: 14px; }
+.authToggleWrap { text-align: center; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--field); }
 .authToggleModeBtn { border: none; background: transparent; color: var(--accent); font-weight: 700; font-size: .82rem; cursor: pointer; font-family: inherit; }
-#authAccountEmail { text-align: center; word-break: break-all; }
+#authAccountEmail, #authPendingEmail { word-break: break-all; }
+#authAccountEmail { text-align: center; }
 .finish-pending-hint { font-size: .78rem; color: var(--ink-soft); font-weight: 700; margin: 2px 0 10px; }
 #finishPendingChoice .mode-opt { padding: 12px; margin-bottom: 8px; }
 #finishPendingChoice .mode-opt:last-child { margin-bottom: 0; }
@@ -652,15 +664,24 @@
   </div>
 </div>
 
-<!-- Conta (entrar / criar conta / sair) -->
+<!-- Conta (entrar / criar conta / confirmar e-mail / sair) -->
 <div class="overlay" id="authOverlay">
   <div class="modal">
     <div id="authFormView">
-      <h3 id="authTitle">Entrar</h3>
-      <p class="finish-sub">Crie uma conta pra sincronizar sua lista entre o celular e o computador.</p>
+      <div class="authHead">
+        <div class="authIconBadge"><svg class="icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.3" r="3.3"/><path d="M4.5 20c1-4 4-6 7.5-6s6.5 2 7.5 6"/></svg></div>
+        <h3 id="authTitle">Entrar</h3>
+        <p class="finish-sub" id="authSubtitle">Crie uma conta pra sincronizar sua lista entre o celular e o computador.</p>
+      </div>
       <form id="authForm" autocomplete="off">
-        <input id="authEmail" type="email" placeholder="E-mail" autocomplete="email" maxlength="120" required>
-        <input id="authPassword" type="password" placeholder="Senha (mín. 6 caracteres)" autocomplete="current-password" minlength="6" maxlength="72" required>
+        <div class="authFieldWrap">
+          <svg class="icon authFieldIcon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 6.5l9 6 9-6"/></svg>
+          <input id="authEmail" type="email" placeholder="E-mail" autocomplete="email" maxlength="120" required>
+        </div>
+        <div class="authFieldWrap">
+          <svg class="icon authFieldIcon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+          <input id="authPassword" type="password" placeholder="Senha (mín. 6 caracteres)" autocomplete="current-password" minlength="6" maxlength="72" required>
+        </div>
         <p class="authError" id="authError"></p>
         <div class="mbtns">
           <button class="btn" id="authCancelBtn" type="button">Agora não</button>
@@ -669,10 +690,26 @@
       </form>
       <p class="authToggleWrap"><button class="authToggleModeBtn" id="authToggleModeBtn" type="button">Não tem conta? Criar uma</button></p>
     </div>
+
+    <div id="authPendingView" hidden>
+      <div class="authHead">
+        <div class="authIconBadge authIconBadge-pending"><svg class="icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 6.5l9 6 9-6"/></svg></div>
+        <h3>Confirme seu e-mail</h3>
+        <p class="finish-sub">Mandamos um link de confirmação para <strong id="authPendingEmail"></strong>. Abra sua caixa de entrada (ou a pasta de spam) e toque no link pra ativar sua conta.</p>
+      </div>
+      <div class="mbtns">
+        <button class="btn" id="authPendingCloseBtn" type="button">Fechar</button>
+        <button class="btn primary" id="authPendingBackBtn" type="button">Já confirmei, entrar</button>
+      </div>
+    </div>
+
     <div id="authLoggedView" hidden>
-      <h3>Sua conta</h3>
-      <p class="finish-sub">Conectado e sincronizando:</p>
-      <p class="mprod" id="authAccountEmail"></p>
+      <div class="authHead">
+        <div class="authIconBadge authIconBadge-ok"><svg class="icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.8l5 5L20 6.3"/></svg></div>
+        <h3>Sua conta</h3>
+        <p class="finish-sub">Conectado e sincronizando:</p>
+        <p class="mprod" id="authAccountEmail"></p>
+      </div>
       <div class="mbtns">
         <button class="btn" id="authCloseBtn2" type="button">Fechar</button>
         <button class="btn primary" id="authSignOutBtn" type="button">Sair da conta</button>
@@ -1746,6 +1783,7 @@ document.getElementById("seedBtn").addEventListener("click", () => {
 // ===== Tour guiado de primeiro uso =====
 const TOUR_STEPS = [
   { sel: "#themeToggle", tab: "lista", title: "🌙 Modo claro/escuro", text: "Toque aqui a qualquer momento para alternar entre tema claro e escuro." },
+  { sel: "#accountBtn", tab: "lista", title: "👤 Crie uma conta (opcional)", text: "Toque aqui pra criar uma conta e sincronizar sua lista, orçamento e histórico entre o celular e o computador. Sem conta, o Listei continua funcionando normalmente — só fica salvo nesse aparelho." },
   { sel: "#searchInput", tab: "lista", title: "🔍 Buscar produto", text: "Use a busca pra encontrar rápido um item que já está na lista — ótimo pra editar a quantidade ou remover algo. Não usa muito? Toque na setinha ▾ ao lado do título pra minimizar esse card." },
   { sel: "#budgetInput", tab: "lista", title: "💰 Defina seu budget", text: "Informe o valor máximo da compra (é opcional). Conforme for marcando itens como comprados, o valor restante aparece aqui." },
   { sel: "#addForm", tab: "lista", title: "➕ Adicione produtos", text: () => state.usageMode === "onthefly"
@@ -2017,7 +2055,9 @@ const SUPABASE_ANON_KEY = "sb_publishable_69KsJb7DjqPJXHbrNabZKg_MPXPn45r";
 let supa = null;
 try {
   if (typeof supabase !== "undefined" && supabase.createClient) {
-    supa = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    supa = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+    });
   }
 } catch (e) { supa = null; }
 
@@ -2031,33 +2071,42 @@ let cloudPulling = false; // evita que o push dispare enquanto um pull está em 
 const accountBtn = document.getElementById("accountBtn");
 const authOverlay = document.getElementById("authOverlay");
 const authFormView = document.getElementById("authFormView");
+const authPendingView = document.getElementById("authPendingView");
 const authLoggedView = document.getElementById("authLoggedView");
 const authTitle = document.getElementById("authTitle");
+const authSubtitle = document.getElementById("authSubtitle");
 const authEmail = document.getElementById("authEmail");
 const authPassword = document.getElementById("authPassword");
 const authError = document.getElementById("authError");
 const authSubmitBtn = document.getElementById("authSubmitBtn");
 const authToggleModeBtn = document.getElementById("authToggleModeBtn");
 const authAccountEmail = document.getElementById("authAccountEmail");
+const authPendingEmail = document.getElementById("authPendingEmail");
 let authMode = "signin";
 
 function updateAuthModeUI() {
   authTitle.textContent = authMode === "signin" ? "Entrar" : "Criar conta";
+  authSubtitle.textContent = authMode === "signin"
+    ? "Entre pra sincronizar sua lista entre o celular e o computador."
+    : "Crie uma conta pra sincronizar sua lista entre o celular e o computador.";
   authSubmitBtn.textContent = authMode === "signin" ? "Entrar" : "Criar conta";
   authToggleModeBtn.textContent = authMode === "signin" ? "Não tem conta? Criar uma" : "Já tem conta? Entrar";
+}
+function showAuthView(view) {
+  authFormView.hidden = view !== "form";
+  authPendingView.hidden = view !== "pending";
+  authLoggedView.hidden = view !== "logged";
 }
 function openAuthOverlay() {
   authError.textContent = "";
   if (cloudSession) {
-    authLoggedView.hidden = false;
-    authFormView.hidden = true;
     authAccountEmail.textContent = cloudSession.user.email;
+    showAuthView("logged");
   } else {
-    authLoggedView.hidden = true;
-    authFormView.hidden = false;
     authMode = "signin";
     authEmail.value = ""; authPassword.value = "";
     updateAuthModeUI();
+    showAuthView("form");
   }
   authOverlay.classList.add("show");
 }
@@ -2065,6 +2114,7 @@ function closeAuthOverlay() { authOverlay.classList.remove("show"); }
 function traduzErroAuth(msg) {
   if (/already registered|already exists/i.test(msg)) return "Esse e-mail já tem conta cadastrada — tente entrar.";
   if (/invalid login credentials/i.test(msg)) return "E-mail ou senha incorretos.";
+  if (/email.*not.*confirmed|confirm.*email/i.test(msg)) return "Falta confirmar seu e-mail — veja o link que mandamos pra sua caixa de entrada (ou spam).";
   if (/password/i.test(msg) && /(short|at least|6 characters)/i.test(msg)) return "Senha muito curta (mínimo 6 caracteres).";
   if (/email/i.test(msg) && /invalid/i.test(msg)) return "E-mail inválido.";
   if (/network|fetch/i.test(msg)) return "Sem conexão com a internet no momento.";
@@ -2079,6 +2129,16 @@ accountBtn.addEventListener("click", openAuthOverlay);
 authOverlay.addEventListener("click", e => { if (e.target === authOverlay) closeAuthOverlay(); });
 document.getElementById("authCancelBtn").addEventListener("click", closeAuthOverlay);
 document.getElementById("authCloseBtn2").addEventListener("click", closeAuthOverlay);
+document.getElementById("authPendingCloseBtn").addEventListener("click", closeAuthOverlay);
+document.getElementById("authPendingBackBtn").addEventListener("click", () => {
+  const typedEmail = authPendingEmail.textContent;
+  authMode = "signin";
+  authError.textContent = "";
+  authEmail.value = typedEmail || "";
+  authPassword.value = "";
+  updateAuthModeUI();
+  showAuthView("form");
+});
 authToggleModeBtn.addEventListener("click", () => {
   authMode = authMode === "signin" ? "signup" : "signin";
   authError.textContent = "";
@@ -2103,8 +2163,8 @@ document.getElementById("authForm").addEventListener("submit", async e => {
       : await supa.auth.signUp({ email, password });
     if (error) { authError.textContent = traduzErroAuth(error.message); return; }
     if (authMode === "signup" && data && !data.session) {
-      toast("Conta criada! Confirme pelo link enviado ao seu e-mail antes de entrar ✓");
-      closeAuthOverlay();
+      authPendingEmail.textContent = email;
+      showAuthView("pending");
       return;
     }
     toast(authMode === "signin" ? "Login feito ✓" : "Conta criada ✓");
@@ -2117,11 +2177,24 @@ document.getElementById("authForm").addEventListener("submit", async e => {
 });
 
 async function cloudLoadHousehold() {
-  const { data: member } = await supa.from("household_members").select("household_id").eq("user_id", cloudSession.user.id).limit(1).maybeSingle();
-  if (!member) return;
-  cloudHouseholdId = member.household_id;
-  const { data: list } = await supa.from("lists").select("id").eq("household_id", cloudHouseholdId).limit(1).maybeSingle();
-  if (list) cloudListId = list.id;
+  const memberRes = await supa.from("household_members").select("household_id").eq("user_id", cloudSession.user.id).limit(1).maybeSingle();
+  if (memberRes.error) {
+    console.error("Erro ao buscar sua casa na nuvem:", memberRes.error);
+    toast("Não consegui carregar sua conta na nuvem (" + memberRes.error.message + ")");
+    return;
+  }
+  if (!memberRes.data) {
+    toast("Sua conta ainda não tem uma lista na nuvem — tente sair e entrar de novo em alguns segundos.");
+    return;
+  }
+  cloudHouseholdId = memberRes.data.household_id;
+  const listRes = await supa.from("lists").select("id").eq("household_id", cloudHouseholdId).limit(1).maybeSingle();
+  if (listRes.error) {
+    console.error("Erro ao buscar sua lista na nuvem:", listRes.error);
+    toast("Não consegui carregar sua lista na nuvem (" + listRes.error.message + ")");
+    return;
+  }
+  if (listRes.data) cloudListId = listRes.data.id;
 }
 
 async function cloudPullAndMerge() {
@@ -2133,6 +2206,12 @@ async function cloudPullAndMerge() {
       supa.from("lists").select("budget, usage_mode").eq("id", cloudListId).maybeSingle(),
       supa.from("purchases").select("name, purchased_at, total, purchase_items(name, qty, price)").eq("household_id", cloudHouseholdId).order("purchased_at", { ascending: true })
     ]);
+    const firstError = itemsRes.error || listRes.error || purchasesRes.error;
+    if (firstError) {
+      console.error("Erro ao sincronizar com a nuvem:", firstError);
+      toast("Não consegui buscar seus dados na nuvem (" + firstError.message + ")");
+      return;
+    }
     const remoteItems = itemsRes.data || [];
     const remoteList = listRes.data;
     const remotePurchases = purchasesRes.data || [];
@@ -2168,6 +2247,7 @@ async function cloudPullAndMerge() {
     toast("Lista sincronizada com a nuvem ✓");
   } catch (e) {
     console.error("Erro ao sincronizar com a nuvem:", e);
+    toast("Não consegui sincronizar agora — verifique sua internet.");
   } finally {
     cloudPulling = false;
   }
@@ -2182,34 +2262,43 @@ function scheduleCloudPush() {
 async function cloudPushFull() {
   if (!supa || !cloudSession || !cloudListId) return;
   try {
-    await supa.from("lists").update({ budget: state.budget, usage_mode: state.usageMode || null }).eq("id", cloudListId);
+    let hadError = false;
+    const listUpdRes = await supa.from("lists").update({ budget: state.budget, usage_mode: state.usageMode || null }).eq("id", cloudListId);
+    if (listUpdRes.error) { hadError = true; console.error("Erro ao salvar budget/modo na nuvem:", listUpdRes.error); }
 
-    await supa.from("items").delete().eq("list_id", cloudListId);
+    const delRes = await supa.from("items").delete().eq("list_id", cloudListId);
+    if (delRes.error) { hadError = true; console.error("Erro ao limpar itens antigos na nuvem:", delRes.error); }
     if (state.items.length) {
       const rows = state.items.map((it, idx) => ({
         id: it.id, list_id: cloudListId, name: it.name, qty: it.qty, price: it.price,
         done: it.done, category: it.category, position: idx
       }));
-      await supa.from("items").insert(rows);
+      const insRes = await supa.from("items").insert(rows);
+      if (insRes.error) { hadError = true; console.error("Erro ao enviar itens pra nuvem:", insRes.error); }
     }
 
     if (state.purchases.length < cloudSyncedPurchaseCount) {
       // histórico foi apagado localmente (ex: "Limpar histórico"): apaga também na nuvem
-      await supa.from("purchases").delete().eq("household_id", cloudHouseholdId);
-      cloudSyncedPurchaseCount = 0;
+      const pDelRes = await supa.from("purchases").delete().eq("household_id", cloudHouseholdId);
+      if (pDelRes.error) { hadError = true; console.error("Erro ao limpar histórico na nuvem:", pDelRes.error); }
+      else cloudSyncedPurchaseCount = 0;
     }
     const newPurchases = state.purchases.slice(cloudSyncedPurchaseCount);
     for (const p of newPurchases) {
-      const { data: inserted } = await supa.from("purchases").insert({
+      const insPurchaseRes = await supa.from("purchases").insert({
         household_id: cloudHouseholdId, name: p.name || "", purchased_at: p.date, total: p.total
       }).select("id").single();
-      if (inserted && p.items.length) {
-        await supa.from("purchase_items").insert(p.items.map(i => ({ purchase_id: inserted.id, name: i.name, qty: i.qty, price: i.price })));
+      if (insPurchaseRes.error) { hadError = true; console.error("Erro ao enviar compra pra nuvem:", insPurchaseRes.error); continue; }
+      if (insPurchaseRes.data && p.items.length) {
+        const insItemsRes = await supa.from("purchase_items").insert(p.items.map(i => ({ purchase_id: insPurchaseRes.data.id, name: i.name, qty: i.qty, price: i.price })));
+        if (insItemsRes.error) { hadError = true; console.error("Erro ao enviar itens da compra pra nuvem:", insItemsRes.error); }
       }
     }
     cloudSyncedPurchaseCount = state.purchases.length;
+    if (hadError) toastOnce("Alguns dados não sincronizaram com a nuvem agora — vamos tentar de novo na próxima alteração.");
   } catch (e) {
     console.error("Erro ao enviar dados pra nuvem:", e);
+    toastOnce("Não consegui sincronizar agora — verifique sua internet.");
   }
 }
 
