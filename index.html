@@ -2114,10 +2114,11 @@ function openAuthOverlay() {
   authOverlay.classList.add("show");
 }
 function closeAuthOverlay() { authOverlay.classList.remove("show"); }
+const EMAIL_NOT_CONFIRMED_RE = /email.*not.*confirmed|confirm.*email/i;
 function traduzErroAuth(msg) {
   if (/already registered|already exists/i.test(msg)) return "Esse e-mail já tem conta cadastrada — tente entrar.";
   if (/invalid login credentials/i.test(msg)) return "E-mail ou senha incorretos.";
-  if (/email.*not.*confirmed|confirm.*email/i.test(msg)) return "Falta confirmar seu e-mail — veja o link que mandamos pra sua caixa de entrada (ou spam).";
+  if (EMAIL_NOT_CONFIRMED_RE.test(msg)) return "Falta confirmar seu e-mail — veja o link que mandamos pra sua caixa de entrada (ou spam).";
   if (/password/i.test(msg) && /(short|at least|6 characters)/i.test(msg)) return "Senha muito curta (mínimo 6 caracteres).";
   if (/email/i.test(msg) && /invalid/i.test(msg)) return "E-mail inválido.";
   if (/security purposes|rate limit|after \d+ seconds/i.test(msg)) return "Muitas tentativas seguidas — espere um pouco antes de pedir outro e-mail.";
@@ -2201,7 +2202,18 @@ document.getElementById("authForm").addEventListener("submit", async e => {
     const { data, error } = authMode === "signin"
       ? await supa.auth.signInWithPassword({ email, password })
       : await supa.auth.signUp({ email, password });
-    if (error) { authError.textContent = traduzErroAuth(error.message); return; }
+    if (error) {
+      authError.textContent = traduzErroAuth(error.message);
+      if (EMAIL_NOT_CONFIRMED_RE.test(error.message)) {
+        authPendingEmail.textContent = email;
+        clearInterval(authResendCooldownTimer);
+        const resendBtn = document.getElementById("authResendBtn");
+        resendBtn.disabled = false;
+        resendBtn.textContent = "Reenviar e-mail de confirmação";
+        showAuthView("pending");
+      }
+      return;
+    }
     if (authMode === "signup" && data && !data.session) {
       authPendingEmail.textContent = email;
       clearInterval(authResendCooldownTimer);
