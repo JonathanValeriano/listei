@@ -697,6 +697,9 @@
         <h3>Confirme seu e-mail</h3>
         <p class="finish-sub">Mandamos um link de confirmação para <strong id="authPendingEmail"></strong>. Abra sua caixa de entrada (ou a pasta de spam) e toque no link pra ativar sua conta.</p>
       </div>
+      <p class="authToggleWrap" style="border-top:none;padding-top:0;margin-top:0;">
+        <button class="authToggleModeBtn" id="authResendBtn" type="button">Não chegou? Reenviar e-mail</button>
+      </p>
       <div class="mbtns">
         <button class="btn" id="authPendingCloseBtn" type="button">Fechar</button>
         <button class="btn primary" id="authPendingBackBtn" type="button">Já confirmei, entrar</button>
@@ -2117,6 +2120,7 @@ function traduzErroAuth(msg) {
   if (/email.*not.*confirmed|confirm.*email/i.test(msg)) return "Falta confirmar seu e-mail — veja o link que mandamos pra sua caixa de entrada (ou spam).";
   if (/password/i.test(msg) && /(short|at least|6 characters)/i.test(msg)) return "Senha muito curta (mínimo 6 caracteres).";
   if (/email/i.test(msg) && /invalid/i.test(msg)) return "E-mail inválido.";
+  if (/security purposes|rate limit|after \d+ seconds/i.test(msg)) return "Muitas tentativas seguidas — espere um pouco antes de pedir outro e-mail.";
   if (/network|fetch/i.test(msg)) return "Sem conexão com a internet no momento.";
   return msg;
 }
@@ -2138,6 +2142,42 @@ document.getElementById("authPendingBackBtn").addEventListener("click", () => {
   authPassword.value = "";
   updateAuthModeUI();
   showAuthView("form");
+});
+let authResendCooldownTimer = null;
+document.getElementById("authResendBtn").addEventListener("click", async () => {
+  const resendBtn = document.getElementById("authResendBtn");
+  const email = authPendingEmail.textContent;
+  if (!supa || !email || resendBtn.disabled) return;
+  resendBtn.disabled = true;
+  resendBtn.textContent = "Enviando...";
+  try {
+    const { error } = await supa.auth.resend({ type: "signup", email });
+    if (error) {
+      toast(traduzErroAuth(error.message));
+      resendBtn.disabled = false;
+      resendBtn.textContent = "Não chegou? Reenviar e-mail";
+      return;
+    }
+    toast("E-mail reenviado ✓");
+  } catch (e) {
+    toast("Não consegui reenviar agora — tente de novo em instantes.");
+    resendBtn.disabled = false;
+    resendBtn.textContent = "Não chegou? Reenviar e-mail";
+    return;
+  }
+  let secondsLeft = 30;
+  resendBtn.textContent = "Aguarde " + secondsLeft + "s pra reenviar";
+  clearInterval(authResendCooldownTimer);
+  authResendCooldownTimer = setInterval(() => {
+    secondsLeft -= 1;
+    if (secondsLeft <= 0) {
+      clearInterval(authResendCooldownTimer);
+      resendBtn.disabled = false;
+      resendBtn.textContent = "Não chegou? Reenviar e-mail";
+    } else {
+      resendBtn.textContent = "Aguarde " + secondsLeft + "s pra reenviar";
+    }
+  }, 1000);
 });
 authToggleModeBtn.addEventListener("click", () => {
   authMode = authMode === "signin" ? "signup" : "signin";
@@ -2164,6 +2204,10 @@ document.getElementById("authForm").addEventListener("submit", async e => {
     if (error) { authError.textContent = traduzErroAuth(error.message); return; }
     if (authMode === "signup" && data && !data.session) {
       authPendingEmail.textContent = email;
+      clearInterval(authResendCooldownTimer);
+      const resendBtn = document.getElementById("authResendBtn");
+      resendBtn.disabled = false;
+      resendBtn.textContent = "Não chegou? Reenviar e-mail";
       showAuthView("pending");
       return;
     }
