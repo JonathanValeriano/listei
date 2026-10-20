@@ -2055,6 +2055,12 @@ window.addEventListener("appinstalled", () => {
 // "supa" fica null e o app continua funcionando 100% local, como sempre funcionou.
 const SUPABASE_URL = "https://ulnrvsaqvmpfdabmnvqu.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_69KsJb7DjqPJXHbrNabZKg_MPXPn45r";
+// Pra onde o link do e-mail de confirmação deve levar o usuário depois de validar —
+// a página "confirmado.html" ao lado do index.html, funciona tanto no GitHub Pages quanto no Netlify
+// porque calcula a pasta atual em vez de usar um endereço fixo.
+function confirmRedirectUrl() {
+  return window.location.origin + window.location.pathname.replace(/[^/]*$/, "") + "confirmado.html";
+}
 let supa = null;
 try {
   if (typeof supabase !== "undefined" && supabase.createClient) {
@@ -2152,7 +2158,7 @@ document.getElementById("authResendBtn").addEventListener("click", async () => {
   resendBtn.disabled = true;
   resendBtn.textContent = "Enviando...";
   try {
-    const { error } = await supa.auth.resend({ type: "signup", email });
+    const { error } = await supa.auth.resend({ type: "signup", email, options: { emailRedirectTo: confirmRedirectUrl() } });
     if (error) {
       toast(traduzErroAuth(error.message));
       resendBtn.disabled = false;
@@ -2201,7 +2207,7 @@ document.getElementById("authForm").addEventListener("submit", async e => {
   try {
     const { data, error } = authMode === "signin"
       ? await supa.auth.signInWithPassword({ email, password })
-      : await supa.auth.signUp({ email, password });
+      : await supa.auth.signUp({ email, password, options: { emailRedirectTo: confirmRedirectUrl() } });
     if (error) {
       authError.textContent = traduzErroAuth(error.message);
       if (EMAIL_NOT_CONFIRMED_RE.test(error.message)) {
