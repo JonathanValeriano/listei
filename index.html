@@ -328,6 +328,20 @@
   .toast-action { background: none; border: none; color: #fff; font-family: inherit;
     font-weight: 800; font-size: .85rem; text-decoration: underline; cursor: pointer;
     padding: 0; flex-shrink: 0; }
+  .purchase-notif-stack { position: fixed; top: 14px; left: 50%; transform: translateX(-50%);
+    z-index: 60; display: flex; flex-direction: column; gap: 8px; width: min(92vw, 380px); pointer-events: none; }
+  .purchase-notif { display: flex; align-items: center; gap: 12px; background: #fff; border-radius: 16px;
+    padding: 12px 14px; box-shadow: 0 12px 28px rgba(21,21,26,.14); pointer-events: auto;
+    transform: translateY(-24px); opacity: 0; transition: transform .32s cubic-bezier(.2,.8,.3,1.2), opacity .32s; }
+  .purchase-notif.show { transform: translateY(0); opacity: 1; }
+  .purchase-notif-avatar { width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--green), #1fa578); color: #fff; font-weight: 800; font-size: .95rem;
+    display: flex; align-items: center; justify-content: center; }
+  .purchase-notif-body { flex: 1; min-width: 0; }
+  .purchase-notif-body strong { font-size: .86rem; color: var(--ink); display: block; line-height: 1.35; }
+  .purchase-notif-body span { font-size: .78rem; color: var(--ink-soft); font-weight: 600; }
+  .purchase-notif-close { background: none; border: none; color: var(--ink-soft); cursor: pointer;
+    flex-shrink: 0; padding: 2px; line-height: 0; }
   @media (max-width: 520px) {
     .form-row { grid-template-columns: 1fr 60px 48px; }
     .form-row.has-price { grid-template-columns: 1fr 64px 48px; }
@@ -407,6 +421,16 @@
 #authAccountEmail, #authPendingEmail { word-break: break-all; }
 #authAccountEmail { text-align: center; }
 .finish-pending-hint { font-size: .78rem; color: var(--ink-soft); font-weight: 700; margin: 2px 0 10px; }
+.familySection { margin-top: 4px; }
+.familyDivider { height: 1px; background: var(--field); margin: 18px 0 14px; }
+.familyLabel { display: flex; align-items: center; gap: 7px; font-size: .88rem; font-weight: 800; color: var(--ink); margin: 0 0 4px; }
+.familyLabel .icon { flex-shrink: 0; color: var(--accent); }
+.familySection .finish-sub { margin-bottom: 10px; }
+.familySection .btn { width: 100%; }
+#inviteResultBox { margin-top: 12px; }
+.inviteCodeBox { text-align: center; font-size: 1.3rem; font-weight: 800; letter-spacing: 4px; color: var(--accent);
+  background: var(--field); border-radius: 12px; padding: 12px; margin-bottom: 10px; }
+#inviteCodeInput { margin-bottom: 8px; }
 #finishPendingChoice .mode-opt { padding: 12px; margin-bottom: 8px; }
 #finishPendingChoice .mode-opt:last-child { margin-bottom: 0; }
   .mode-opt-icon { line-height: 1; flex-shrink: 0; color: var(--accent); }
@@ -641,6 +665,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
+<div class="purchase-notif-stack" id="purchaseNotifStack"></div>
 
 <!-- Escolha do modo de uso -->
 <div class="mode-overlay" id="modeOverlay">
@@ -713,6 +738,28 @@
         <p class="finish-sub">Conectado e sincronizando:</p>
         <p class="mprod" id="authAccountEmail"></p>
       </div>
+
+      <div class="familySection" id="familyOwnerSection" hidden>
+        <div class="familyDivider"></div>
+        <p class="familyLabel"><svg class="icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8a3 3 0 1 0-2.8-4M3.5 19.5c.7-3 3-5 5.8-5s5.1 2 5.8 5M9.3 11.8a3.3 3.3 0 1 0 0-6.6 3.3 3.3 0 0 0 0 6.6z"/><path d="M15.5 14.8c2.4.4 4.3 2.2 4.9 4.7"/></svg> Convidar alguém da família</p>
+        <p class="finish-sub">Gere um código pra outra pessoa entrar na sua lista compartilhada.</p>
+        <button class="btn" id="generateInviteBtn" type="button">Gerar código de convite</button>
+        <div id="inviteResultBox" hidden>
+          <div class="inviteCodeBox" id="inviteCodeText"></div>
+          <button class="btn" id="copyInviteLinkBtn" type="button">Copiar link do convite</button>
+        </div>
+      </div>
+
+      <div class="familySection">
+        <div class="familyDivider"></div>
+        <p class="familyLabel"><svg class="icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg> Tem um código de convite?</p>
+        <div class="authFieldWrap">
+          <input id="inviteCodeInput" type="text" placeholder="Ex: AB12CD" maxlength="8" style="text-transform:uppercase;padding-left:14px;text-align:center;letter-spacing:2px;">
+        </div>
+        <p class="authError" id="inviteError"></p>
+        <button class="btn" id="redeemInviteBtn" type="button">Entrar com código</button>
+      </div>
+
       <div class="mbtns">
         <button class="btn" id="authCloseBtn2" type="button">Fechar</button>
         <button class="btn primary" id="authSignOutBtn" type="button">Sair da conta</button>
@@ -2073,8 +2120,16 @@ try {
 let cloudSession = null;
 let cloudHouseholdId = null;
 let cloudListId = null;
+let cloudRole = null;
+let displayNameCache = {}; // user_id -> display_name, evita reconsultar o mesmo membro várias vezes
 let cloudSyncedPurchaseCount = 0;
 let cloudSyncTimer = null;
+// Rastreia exclusões de itens de forma explícita (em vez de inferir "sumiu = foi apagado"
+// comparando com o que está na nuvem) — essencial com vários membros editando ao mesmo
+// tempo: um item que outra pessoa acabou de adicionar não pode ser confundido com algo
+// que "este aparelho não conhece ainda" e por isso ser apagado por engano.
+let knownLocalItemIds = [];
+let pendingDeletedItemIds = new Set();
 let cloudPulling = false; // evita que o push dispare enquanto um pull está em andamento
 
 const accountBtn = document.getElementById("accountBtn");
@@ -2091,7 +2146,16 @@ const authSubmitBtn = document.getElementById("authSubmitBtn");
 const authToggleModeBtn = document.getElementById("authToggleModeBtn");
 const authAccountEmail = document.getElementById("authAccountEmail");
 const authPendingEmail = document.getElementById("authPendingEmail");
+const familyOwnerSection = document.getElementById("familyOwnerSection");
+const generateInviteBtn = document.getElementById("generateInviteBtn");
+const inviteResultBox = document.getElementById("inviteResultBox");
+const inviteCodeText = document.getElementById("inviteCodeText");
+const copyInviteLinkBtn = document.getElementById("copyInviteLinkBtn");
+const inviteCodeInput = document.getElementById("inviteCodeInput");
+const inviteError = document.getElementById("inviteError");
+const redeemInviteBtn = document.getElementById("redeemInviteBtn");
 let authMode = "signin";
+const PENDING_INVITE_KEY = "claylista_pending_invite";
 
 function updateAuthModeUI() {
   authTitle.textContent = authMode === "signin" ? "Entrar" : "Criar conta";
@@ -2106,10 +2170,17 @@ function showAuthView(view) {
   authPendingView.hidden = view !== "pending";
   authLoggedView.hidden = view !== "logged";
 }
+function refreshFamilySection() {
+  familyOwnerSection.hidden = cloudRole !== "owner";
+  inviteResultBox.hidden = true;
+  inviteCodeInput.value = "";
+  inviteError.textContent = "";
+}
 function openAuthOverlay() {
   authError.textContent = "";
   if (cloudSession) {
     authAccountEmail.textContent = cloudSession.user.email;
+    refreshFamilySection();
     showAuthView("logged");
   } else {
     authMode = "signin";
@@ -2239,7 +2310,7 @@ document.getElementById("authForm").addEventListener("submit", async e => {
 });
 
 async function cloudLoadHousehold() {
-  const memberRes = await supa.from("household_members").select("household_id").eq("user_id", cloudSession.user.id).limit(1).maybeSingle();
+  const memberRes = await supa.from("household_members").select("household_id, role").eq("user_id", cloudSession.user.id).limit(1).maybeSingle();
   if (memberRes.error) {
     console.error("Erro ao buscar sua casa na nuvem:", memberRes.error);
     toast("Não consegui carregar sua conta na nuvem (" + memberRes.error.message + ")");
@@ -2250,6 +2321,7 @@ async function cloudLoadHousehold() {
     return;
   }
   cloudHouseholdId = memberRes.data.household_id;
+  cloudRole = memberRes.data.role || null;
   const listRes = await supa.from("lists").select("id").eq("household_id", cloudHouseholdId).limit(1).maybeSingle();
   if (listRes.error) {
     console.error("Erro ao buscar sua lista na nuvem:", listRes.error);
@@ -2283,6 +2355,8 @@ async function cloudPullAndMerge() {
 
     if (!remoteHasData && localHasData) {
       // primeiro login com dados locais já existentes: manda o que já tinha pra nuvem
+      knownLocalItemIds = state.items.map(it => it.id);
+      pendingDeletedItemIds.clear();
       cloudPulling = false;
       await cloudPushFull();
       return;
@@ -2292,6 +2366,10 @@ async function cloudPullAndMerge() {
       id: it.id, name: it.name, qty: it.qty, price: it.price, done: it.done,
       category: it.category || detectCategory(it.name)
     }));
+    // a partir daqui, "o que existe localmente agora" é a nova referência —
+    // descarta qualquer exclusão pendente de antes do pull (o remoto acabou de ganhar)
+    knownLocalItemIds = state.items.map(it => it.id);
+    pendingDeletedItemIds.clear();
     state.purchases = remotePurchases.map(p => ({
       date: p.purchased_at, name: p.name || "",
       items: (p.purchase_items || []).map(pi => ({ name: pi.name, qty: pi.qty, price: pi.price })),
@@ -2315,8 +2393,108 @@ async function cloudPullAndMerge() {
   }
 }
 
+// ===== Notificação de compra em tempo real =====
+function formatBRL(n) {
+  const v = Number(n) || 0;
+  return "R$ " + v.toFixed(2).replace(".", ",");
+}
+function initialsOf(name) {
+  const parts = String(name || "").trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return "?";
+  return (parts[0][0] + (parts[1] ? parts[1][0] : "")).toUpperCase();
+}
+function showPurchaseNotification(who, itemName, price) {
+  const stack = document.getElementById("purchaseNotifStack");
+  if (!stack) return;
+  const card = document.createElement("div");
+  card.className = "purchase-notif";
+  card.innerHTML =
+    '<div class="purchase-notif-avatar">' + initialsOf(who) + '</div>' +
+    '<div class="purchase-notif-body"><strong></strong><span></span></div>' +
+    '<button type="button" class="purchase-notif-close" aria-label="Fechar">' +
+    '<svg class="icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5.5 5.5l13 13"/><path d="M18.5 5.5l-13 13"/></svg></button>';
+  card.querySelector("strong").textContent = who + " marcou \"" + itemName + "\" como comprado";
+  card.querySelector("span").textContent = "Preço: " + formatBRL(price);
+  const remove = () => { card.classList.remove("show"); setTimeout(() => card.remove(), 320); };
+  card.querySelector(".purchase-notif-close").addEventListener("click", remove);
+  stack.appendChild(card);
+  requestAnimationFrame(() => card.classList.add("show"));
+  setTimeout(remove, 5000);
+}
+async function resolveDisplayName(userId) {
+  if (cloudSession && userId === cloudSession.user.id) return "Você";
+  if (displayNameCache[userId]) return displayNameCache[userId];
+  try {
+    const res = await supa.rpc("get_member_display_name", { p_user_id: userId });
+    const name = (res && !res.error && res.data) ? res.data : "Alguém da família";
+    displayNameCache[userId] = name;
+    return name;
+  } catch (e) {
+    return "Alguém da família";
+  }
+}
+
+// ===== Assinatura em tempo real: aplica mudanças de outros membros sem re-disparar push =====
+let cloudRealtimeChannel = null;
+function teardownRealtimeChannel() {
+  if (cloudRealtimeChannel && supa && typeof supa.removeChannel === "function") {
+    try { supa.removeChannel(cloudRealtimeChannel); } catch (e) { /* ignore */ }
+  }
+  cloudRealtimeChannel = null;
+}
+async function handleRealtimeItemChange(payload) {
+  if (!cloudSession || cloudPulling) return;
+  const newRow = payload.new || null;
+  const oldRow = payload.old || null;
+  if (payload.eventType === "DELETE" || payload.type === "DELETE") {
+    if (oldRow && oldRow.id) {
+      state.items = state.items.filter(it => it.id !== oldRow.id);
+      knownLocalItemIds = knownLocalItemIds.filter(id => id !== oldRow.id);
+    }
+  } else if (newRow) {
+    const mapped = {
+      id: newRow.id, name: newRow.name, qty: newRow.qty, price: newRow.price,
+      done: newRow.done, category: newRow.category || detectCategory(newRow.name)
+    };
+    const idx = state.items.findIndex(it => it.id === newRow.id);
+    if (idx === -1) {
+      state.items.push(mapped);
+      if (!knownLocalItemIds.includes(newRow.id)) knownLocalItemIds.push(newRow.id);
+    } else {
+      state.items[idx] = mapped;
+    }
+    const justMarkedDone = oldRow && oldRow.done === false && newRow.done === true;
+    const byOtherMember = newRow.updated_by && (!cloudSession || newRow.updated_by !== cloudSession.user.id);
+    if (justMarkedDone && byOtherMember) {
+      const who = await resolveDisplayName(newRow.updated_by);
+      showPurchaseNotification(who, newRow.name, newRow.price);
+    }
+  } else {
+    return;
+  }
+  mem = state;
+  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* ignore */ }
+  renderList();
+}
+function setupRealtimeChannel() {
+  if (!supa || !cloudListId || typeof supa.channel !== "function") return;
+  teardownRealtimeChannel();
+  try {
+    cloudRealtimeChannel = supa
+      .channel("items-" + cloudListId)
+      .on("postgres_changes", { event: "*", schema: "public", table: "items", filter: "list_id=eq." + cloudListId }, handleRealtimeItemChange)
+      .subscribe();
+  } catch (e) {
+    console.error("Erro ao assinar realtime:", e);
+    cloudRealtimeChannel = null;
+  }
+}
+
 function scheduleCloudPush() {
   if (!supa || !cloudSession || !cloudListId || cloudPulling) return;
+  const currentIds = state.items.map(it => it.id);
+  knownLocalItemIds.forEach(id => { if (!currentIds.includes(id)) pendingDeletedItemIds.add(id); });
+  knownLocalItemIds = currentIds;
   clearTimeout(cloudSyncTimer);
   cloudSyncTimer = setTimeout(cloudPushFull, 900);
 }
@@ -2328,15 +2506,25 @@ async function cloudPushFull() {
     const listUpdRes = await supa.from("lists").update({ budget: state.budget, usage_mode: state.usageMode || null }).eq("id", cloudListId);
     if (listUpdRes.error) { hadError = true; console.error("Erro ao salvar budget/modo na nuvem:", listUpdRes.error); }
 
-    const delRes = await supa.from("items").delete().eq("list_id", cloudListId);
-    if (delRes.error) { hadError = true; console.error("Erro ao limpar itens antigos na nuvem:", delRes.error); }
+    // Upsert item a item (em vez de apagar tudo e reinserir) — essencial pra colaboração
+    // simultânea: assim uma alteração de outro membro da casa não é apagada por engano
+    // entre o momento em que ela chega e o próximo push deste aparelho.
     if (state.items.length) {
       const rows = state.items.map((it, idx) => ({
         id: it.id, list_id: cloudListId, name: it.name, qty: it.qty, price: it.price,
-        done: it.done, category: it.category, position: idx
+        done: it.done, category: it.category, position: idx, updated_by: cloudSession.user.id
       }));
-      const insRes = await supa.from("items").insert(rows);
-      if (insRes.error) { hadError = true; console.error("Erro ao enviar itens pra nuvem:", insRes.error); }
+      const upsertRes = await supa.from("items").upsert(rows, { onConflict: "id" });
+      if (upsertRes.error) { hadError = true; console.error("Erro ao enviar itens pra nuvem:", upsertRes.error); }
+    }
+    // Remove da nuvem só os ids que SABEMOS que sumiram por ação deste aparelho
+    // (ver scheduleCloudPush) — nunca inferido comparando com o que está na nuvem agora,
+    // pra não apagar um item que outro membro da casa acabou de adicionar.
+    if (pendingDeletedItemIds.size) {
+      const idsToDelete = Array.from(pendingDeletedItemIds);
+      const delRes = await supa.from("items").delete().in("id", idsToDelete);
+      if (delRes.error) { hadError = true; console.error("Erro ao remover itens antigos na nuvem:", delRes.error); }
+      else idsToDelete.forEach(id => pendingDeletedItemIds.delete(id));
     }
 
     if (state.purchases.length < cloudSyncedPurchaseCount) {
@@ -2364,6 +2552,7 @@ async function cloudPushFull() {
   }
 }
 
+let initialAuthCheckDone = false;
 function cloudInit() {
   if (!supa) { updateAccountUI(); return; }
   supa.auth.onAuthStateChange(async (event, session) => {
@@ -2372,14 +2561,136 @@ function cloudInit() {
     if (session && !hadSession) {
       await cloudLoadHousehold();
       await cloudPullAndMerge();
+      await consumePendingInviteIfAny();
+      setupRealtimeChannel();
     }
     if (!session && hadSession) {
-      cloudHouseholdId = null; cloudListId = null; cloudSyncedPurchaseCount = 0;
+      teardownRealtimeChannel();
+      cloudHouseholdId = null; cloudListId = null; cloudRole = null; cloudSyncedPurchaseCount = 0;
+      knownLocalItemIds = []; pendingDeletedItemIds.clear(); displayNameCache = {};
     }
+    if (!session && !initialAuthCheckDone) {
+      let pending = null;
+      try { pending = localStorage.getItem(PENDING_INVITE_KEY); } catch (e) { pending = null; }
+      if (pending) {
+        authMode = "signup";
+        authEmail.value = ""; authPassword.value = "";
+        updateAuthModeUI();
+        authSubtitle.textContent = "Crie sua conta pra entrar na lista da família com o convite que você recebeu.";
+        showAuthView("form");
+        authOverlay.classList.add("show");
+      }
+    }
+    initialAuthCheckDone = true;
     updateAccountUI();
   });
 }
 cloudInit();
+
+// ===== Convite de família: gerar código, copiar link, entrar com código =====
+function randomInviteCode(len) {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // sem O/0, I/1 pra evitar confusão
+  let out = "";
+  for (let i = 0; i < len; i++) out += chars[Math.floor(Math.random() * chars.length)];
+  return out;
+}
+function inviteLinkFor(code) {
+  return window.location.origin + window.location.pathname.replace(/[^/]*$/, "") + "?invite=" + encodeURIComponent(code);
+}
+if (generateInviteBtn) {
+  generateInviteBtn.addEventListener("click", async () => {
+    if (!supa || !cloudSession || !cloudHouseholdId) return;
+    generateInviteBtn.disabled = true;
+    try {
+      const code = randomInviteCode(6);
+      const insRes = await supa.from("household_invites").insert({
+        household_id: cloudHouseholdId, code, created_by: cloudSession.user.id
+      }).select("code").single();
+      if (insRes.error) {
+        toast("Não consegui gerar o convite (" + insRes.error.message + ")");
+        return;
+      }
+      const finalCode = insRes.data.code;
+      inviteCodeText.textContent = finalCode;
+      inviteResultBox.hidden = false;
+      inviteResultBox.dataset.link = inviteLinkFor(finalCode);
+    } catch (e) {
+      toast("Não consegui gerar o convite agora — tente de novo.");
+    } finally {
+      generateInviteBtn.disabled = false;
+    }
+  });
+}
+if (copyInviteLinkBtn) {
+  copyInviteLinkBtn.addEventListener("click", async () => {
+    const link = inviteResultBox.dataset.link || "";
+    if (!link) return;
+    try {
+      await navigator.clipboard.writeText(link);
+      toast("Link copiado ✓");
+    } catch (e) {
+      toast("Não consegui copiar — copie manualmente: " + link);
+    }
+  });
+}
+async function redeemInviteCode(code) {
+  if (!supa || !cloudSession || !code) return false;
+  inviteError.textContent = "";
+  redeemInviteBtn.disabled = true;
+  try {
+    const rpcRes = await supa.rpc("redeem_invite", { invite_code: code.trim().toUpperCase() });
+    if (rpcRes.error) {
+      inviteError.textContent = traduzErroConvite(rpcRes.error.message);
+      return false;
+    }
+    cloudHouseholdId = null; cloudListId = null; cloudRole = null;
+    knownLocalItemIds = []; pendingDeletedItemIds.clear();
+    await cloudLoadHousehold();
+    await cloudPullAndMerge();
+    setupRealtimeChannel();
+    refreshFamilySection();
+    toast("Você entrou na família ✓");
+    return true;
+  } catch (e) {
+    inviteError.textContent = "Algo deu errado — tente de novo em instantes.";
+    return false;
+  } finally {
+    redeemInviteBtn.disabled = false;
+  }
+}
+function traduzErroConvite(msg) {
+  if (/not.*found|invalid|inexistente|não encontrado/i.test(msg)) return "Código inválido — confira e tente de novo.";
+  if (/expired|expirado/i.test(msg)) return "Esse código expirou — peça um novo convite.";
+  if (/already.*member|já.*membro/i.test(msg)) return "Você já faz parte dessa família.";
+  return "Não consegui usar esse código agora — tente de novo.";
+}
+if (redeemInviteBtn) {
+  redeemInviteBtn.addEventListener("click", () => {
+    const code = inviteCodeInput.value.trim();
+    if (!code) { inviteError.textContent = "Digite o código do convite."; return; }
+    redeemInviteCode(code);
+  });
+}
+async function consumePendingInviteIfAny() {
+  let pending = null;
+  try { pending = localStorage.getItem(PENDING_INVITE_KEY); } catch (e) { pending = null; }
+  if (!pending) return;
+  try { localStorage.removeItem(PENDING_INVITE_KEY); } catch (e) {}
+  const ok = await redeemInviteCode(pending);
+  if (ok) toast("Convite aceito — você entrou na lista da família ✓");
+}
+(function captureInviteFromUrl() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("invite");
+    if (code) {
+      localStorage.setItem(PENDING_INVITE_KEY, code);
+      // limpa o parâmetro da URL pra não ficar reaplicando em recarregamentos
+      const cleanUrl = window.location.pathname + window.location.hash;
+      window.history.replaceState({}, document.title, cleanUrl);
+    }
+  } catch (e) {}
+})();
 </script>
 </body>
 </html>
